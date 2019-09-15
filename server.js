@@ -13,6 +13,14 @@ app.get('/',(req,res)=>{
  	})
 });
 
+app.get('/login',(req,res)=>{
+ 	res.render('login',{
+ 		layout:'login',
+ 		helpers:{
+ 			title : 'login'
+ 		}
+ 	})
+});
 app.listen(port ,()=>{
 	console.log( " listen the port "+ port )
 });
