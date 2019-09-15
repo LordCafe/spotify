@@ -1,14 +1,17 @@
 let express = require("express");
-let hbs = require("express-handlebars"); 
 let app = express();
+let hbs = require('./hbsHelpers');
+hbs(app, __dirname);
 let port = 3000;
-app.engine('.hbs', hbs({ extname:'.hbs'}));
-app.set('view engine','.hbs');
+app.use(express.static('public'));
 
 app.get('/',(req,res)=>{
- 	res.render('home')
+ 	res.render('home',{
+ 		helpers:{
+ 			title : 'home'
+ 		}
+ 	})
 });
-
 
 app.listen(port ,()=>{
 	console.log( " listen the port "+ port )
