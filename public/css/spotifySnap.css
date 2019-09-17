@@ -38,3 +38,13 @@ body{
 .width50{
 	width: 50%;
 }
+
+
+#currentSong .card {
+	background-color:#282828;
+	color: rgba(255,255,255, .7); 
+}
+
+#currentSong .fa{
+	font-size: 35px;
+}

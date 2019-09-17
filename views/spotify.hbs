@@ -2,7 +2,7 @@
     <div class="row">
         <div class="col-4">
             <div id='profile-spotify' class="card ">
-                <img  src="..." class="card-img-top rounded-circle width50 " alt="...">
+                <img src="" class="card-img-top rounded-circle width50 " alt="...">
                 <div class="card-body">
                     <h5 class="card-title">Card title</h5>
                 </div>
@@ -11,107 +11,148 @@
         <div class="col-8 ">
             <div>
                 <form id="SpotifySnapform">
-                    <div class="form-group">                      
+                    <div class="form-group">
                         <input type="text" class="form-control" id="SearchSpotify" placeholder="Escribir...">
                         <button type="submit" class="btn btn-primary mb-2" style="display: none">Buscar</button>
                     </div>
                 </form>
-                <div id="result" class="result row "></div>
+                <div id="result" class="result row " style="position:absolute; "></div>
             </div>
         </div>
     </div>
+    <div class="row">
+        <div id="currentSong" class="col-4">
+            <div class="card" style="width: 18rem;">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPgvBgACHgEXvIm+6QAAAABJRU5ErkJggg==" class="card-img-top" alt="...">
+                <div class="card-body">
+                    <p class="card-title"></p>
+                    <p class="card-text"></p>
+                    <i  data-status='play' class="fa fa-play-circle" onclick="controls.click(this)"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-8"></div>
+    </div>
 </div>
 <script type="text/javascript">
-document.addEventListener('DOMContentLoaded', function(event) {
-    
-let urlParams = new URLSearchParams(location.search);
-const token = urlParams.get('access_token');
-let SpotifySnap = new SpotifyPlayers({
-    token: token
-});
+let controls = {
 
-window.onSpotifyWebPlaybackSDKReady = () => {
+    click: function(e) {
+        e.classList.toggle('fa-play-circle');
+        e.classList.toggle('fa-pause-circle');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function(event) {
     let urlParams = new URLSearchParams(location.search);
     const token = urlParams.get('access_token');
-    const player = new Spotify.Player({
-        name: 'SnapSoptify',
-        getOAuthToken: cb => { cb(token); }
+    let SpotifySnap = new SpotifyPlayers({
+        token: token
     });
 
-    // Error handling
-    player.addListener('initialization_error', ({ message }) => { console.error(message); });
-    player.addListener('authentication_error', ({ message }) => { console.error(message); });
-    player.addListener('account_error', ({ message }) => { console.error(message); });
-    player.addListener('playback_error', ({ message }) => { console.error(message); });
+    let RenderPreview = (track) => {
+        let { album, uri } = track;
+        let Preview = document.querySelector("#currentSong");
+        if (uri != Preview.dataset.trackId ) {
+            Preview.dataset.trackId = track.uri;
+            Preview.querySelector('img').src = album.images[0].url;
+            Preview.querySelector('.card-title').innerText = track.name;
+            Preview.querySelector('.card-text').innerText = track.artists[0].name;
+            Preview.querySelector('i').click();
+        }
 
-    // Playback status updates
-    player.addListener('player_state_changed', state => { console.log(state); });
-
-    // Ready
-    player.addListener('ready', ({ device_id }) => {
-         console.log('Ready with Device ID', device_id);
-         SpotifySnap.SetDevide(device_id);
-       
         
-    });
-
-    // Not Ready
-    player.addListener('not_ready', ({ device_id }) => {
-
-    });
-
-    // Connect to the player!
-    player.connect();
+    }
 
 
-};
+    window.onSpotifyWebPlaybackSDKReady = () => {
+        let urlParams = new URLSearchParams(location.search);
+        const token = urlParams.get('access_token');
+        const player = new Spotify.Player({
+            name: 'SnapSoptify',
+            getOAuthToken: cb => { cb(token); }
+        });
 
-SpotifySnap.GetInfo().then((user) => {
-        let { images: [avatar], display_name } = user;        
+        // Error handling
+        player.addListener('initialization_error', ({ message }) => { console.error(message); });
+        player.addListener('authentication_error', ({ message }) => { console.error(message); });
+        player.addListener('account_error', ({ message }) => { console.error(message); });
+        player.addListener('playback_error', ({ message }) => { console.error(message); });
+
+        // Playback status updates
+        player.addListener('player_state_changed', state => {
+            let { track_window } = state;
+            RenderPreview(track_window.current_track);
+        });
+
+        // Ready
+        player.addListener('ready', ({ device_id }) => {
+            console.log('Ready with Device ID', device_id);
+            SpotifySnap.SetDevide(device_id);
+
+
+        });
+
+        // Not Ready
+        player.addListener('not_ready', ({ device_id }) => {
+
+        });
+
+        // Connect to the player!
+        player.connect().then((connect) => {
+            console.log(connect);
+        });
+
+
+    };
+
+    SpotifySnap.GetInfo().then((user) => {
+        let { images: [avatar], display_name } = user;
         let profile = document.querySelector('#profile-spotify');
         profile.querySelector('img').src = avatar.url;
         profile.querySelector(".card-title").innerText = display_name;
 
     });
 
-let target = document.querySelector('#result');
-let lastTrack = SpotifySnap.GetLastPlayed().then((tracks)=>{
-   let { track } = tracks.items[0]; 
+    let target = document.querySelector('#result');
+    let lastTrack = SpotifySnap.GetLastPlayed().then((tracks) => {
+        let { track } = tracks.items[0];
 
-});
-
-
-document.querySelector('#SpotifySnapform').addEventListener('submit',function(event){
-    event.preventDefault();
-    let element = event.target;
-    let search = element.SearchSpotify;
-     target.innerHTML ='';
-    
-    SpotifySnap.Search({
-        q: search.value,
-        type: 'track',
-        limit: 10,
-        offset: 5,
-    }).then((result) => {
-        let { tracks } = result;
-       
-
-        tracks.items.map(function(track, index) {
-            let { album } = track;                                      
-            let html =albumHtml({ id : album.id,src : album.images[0].url ,name : track.name , artist : track.artists[0].name }, track );
-            target.insertAdjacentHTML('beforeend',html);
-            target.lastElementChild.addEventListener('click',function(event){
-                SpotifySnap.PlaySong(track.uri)
-            }, false );            
-        })
     });
 
 
-});
 
-    
+    document.querySelector('#SpotifySnapform').addEventListener('submit', function(event) {
+        event.preventDefault();
+        let element = event.target;
+        let search = element.SearchSpotify;
+        target.innerHTML = '';
 
-    
+        SpotifySnap.Search({
+            q: search.value,
+            type: 'track',
+            limit: 10,
+            offset: 5,
+        }).then((result) => {
+            let { tracks } = result;
+            tracks.items.map(function(track, index) {
+                let { album } = track;
+                let html = albumHtml({ id: album.id, src: album.images[0].url, name: track.name, artist: track.artists[0].name }, track);
+                target.insertAdjacentHTML('beforeend', html);
+                target.lastElementChild.addEventListener('click', function(event) {
+                    SpotifySnap.PlaySong(track.uri);
+                    RenderPreview(track);
+
+                }, false);
+            })
+        })
+
+
+    });
+
+
+
+
 
 });
 </script>
