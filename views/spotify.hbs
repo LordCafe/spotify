@@ -23,19 +23,69 @@
 </div>
 <script type="text/javascript">
 document.addEventListener('DOMContentLoaded', function(event) {
+    
+let urlParams = new URLSearchParams(location.search);
+const token = urlParams.get('access_token');
+let SpotifySnap = new SpotifyPlayers({
+    token: token
+});
+
+window.onSpotifyWebPlaybackSDKReady = () => {
     let urlParams = new URLSearchParams(location.search);
     const token = urlParams.get('access_token');
-    let SpotifySnap = new SpotifyPlayers({
-        token: token
+    const player = new Spotify.Player({
+        name: 'SnapSoptify',
+        getOAuthToken: cb => { cb(token); }
     });
 
+    // Error handling
+    player.addListener('initialization_error', ({ message }) => { console.error(message); });
+    player.addListener('authentication_error', ({ message }) => { console.error(message); });
+    player.addListener('account_error', ({ message }) => { console.error(message); });
+    player.addListener('playback_error', ({ message }) => { console.error(message); });
+
+    // Playback status updates
+    player.addListener('player_state_changed', state => { console.log(state); });
+
+    // Ready
+    player.addListener('ready', ({ device_id }) => {
+         console.log('Ready with Device ID', device_id);
+         SpotifySnap.SetDevide(device_id);
+       
+        
+    });
+
+    // Not Ready
+    player.addListener('not_ready', ({ device_id }) => {
+
+    });
+
+    // Connect to the player!
+    player.connect();
+
+
+};
+
+SpotifySnap.GetInfo().then((user) => {
+        let { images: [avatar], display_name } = user;        
+        let profile = document.querySelector('#profile-spotify');
+        profile.querySelector('img').src = avatar.url;
+        profile.querySelector(".card-title").innerText = display_name;
+
+    });
 
 let target = document.querySelector('#result');
+let lastTrack = SpotifySnap.GetLastPlayed().then((tracks)=>{
+   let { track } = tracks.items[0]; 
+
+});
+
 
 document.querySelector('#SpotifySnapform').addEventListener('submit',function(event){
     event.preventDefault();
     let element = event.target;
     let search = element.SearchSpotify;
+     target.innerHTML ='';
     
     SpotifySnap.Search({
         q: search.value,
@@ -44,15 +94,21 @@ document.querySelector('#SpotifySnapform').addEventListener('submit',function(ev
         offset: 5,
     }).then((result) => {
         let { tracks } = result;
+       
+
         tracks.items.map(function(track, index) {
-            let { album } = track;                                       
-            let html =albumHtml({ id : album.id,src : album.images[0].url ,name : track.name , artist : track.artists[0].name });              
-            target.insertAdjacentHTML('beforeend',html);            
+            let { album } = track;                                      
+            let html =albumHtml({ id : album.id,src : album.images[0].url ,name : track.name , artist : track.artists[0].name }, track );
+            target.insertAdjacentHTML('beforeend',html);
+            target.lastElementChild.addEventListener('click',function(event){
+                SpotifySnap.PlaySong(track.uri)
+            }, false );            
         })
     });
 
 
 });
+
     
 
     

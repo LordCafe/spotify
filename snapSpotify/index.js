@@ -4,7 +4,7 @@ let { generateRandomString, authOptions, RefreshAuth } = require('./helpersSpoti
 
 var stateKey = 'spotify_auth_state';
 let client_id = '8710e416ce234171976128df1c02d93c';
-let scope = 'user-read-private user-read-email';
+let scope = 'user-read-private user-read-email playlist-read-private user-read-recently-played streaming';
 let client_secret = '4799786a0c394f9ba9800dbe26574cc2';
 let redirect_uri = 'http://localhost:3000/spotify';
 
