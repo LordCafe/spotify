@@ -1,0 +1,61 @@
+<div class="container">
+    <div class="row">
+        <div class="col-4">
+            <div id='profile-spotify' class="card ">
+                <img  src="..." class="card-img-top rounded-circle width50 " alt="...">
+                <div class="card-body">
+                    <h5 class="card-title">Card title</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-8 ">
+            <div>
+                <form id="SpotifySnapform">
+                    <div class="form-group">                      
+                        <input type="text" class="form-control" id="SearchSpotify" placeholder="Escribir...">
+                        <button type="submit" class="btn btn-primary mb-2" style="display: none">Buscar</button>
+                    </div>
+                </form>
+                <div id="result" class="result row "></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function(event) {
+    let urlParams = new URLSearchParams(location.search);
+    const token = urlParams.get('access_token');
+    let SpotifySnap = new SpotifyPlayers({
+        token: token
+    });
+
+
+let target = document.querySelector('#result');
+
+document.querySelector('#SpotifySnapform').addEventListener('submit',function(event){
+    event.preventDefault();
+    let element = event.target;
+    let search = element.SearchSpotify;
+    
+    SpotifySnap.Search({
+        q: search.value,
+        type: 'track',
+        limit: 10,
+        offset: 5,
+    }).then((result) => {
+        let { tracks } = result;
+        tracks.items.map(function(track, index) {
+            let { album } = track;                                       
+            let html =albumHtml({ id : album.id,src : album.images[0].url ,name : track.name , artist : track.artists[0].name });              
+            target.insertAdjacentHTML('beforeend',html);            
+        })
+    });
+
+
+});
+    
+
+    
+
+});
+</script>

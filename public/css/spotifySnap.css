@@ -1,0 +1,40 @@
+body{
+ background-color: rgba(0,0,0,0.9);
+}
+
+
+.fa{
+	color:#dddd;
+}
+.bGray{
+	background-color: gray;
+}
+
+#profile-spotify{
+	background-color: rgba(0,0,0,.8);
+	color: white;
+}
+
+.spotify-title{
+	color: #DDDD;
+}
+
+.spotify-text{
+	color: #777;
+}
+
+#result{}
+.spotify-result{
+	width: 100%;
+	background-color: rgba(1,1,1,.8);
+	margin: 0px;
+
+}
+
+
+.spotify-result:hover{
+	background-color: rgba(1,1,1,1);
+}
+.width50{
+	width: 50%;
+}

@@ -1,0 +1,39 @@
+<div class="container profiles">
+    <div class="row">
+         {{> profile/profile-left}}
+         {{> profile/profile-rigth}}     
+        
+    </div>
+</div>
+<script type="text/javascript">
+let CreateDots = (target, loop, color ) => {
+    let DomGraph = document.createElement('div');
+    let span = document.createElement('span');
+    span.classList.add('dot');
+  
+    //DomGraph.appendChild(span);
+    for (var i = loop - 1; i >= 0; i--) {
+        color --;
+        let NewSpan = span.cloneNode(true)
+        if(color > 0 ){
+          NewSpan.classList.add('colorDot');
+        }
+        DomGraph.appendChild(NewSpan);
+    }
+    target.appendChild(DomGraph);
+}
+
+document.addEventListener("DOMContentLoaded", function(event) {
+    let skills = document.querySelectorAll('.skills[data-skills]');
+    skills.forEach((data, index) => {
+        let skill = data.dataset.skills;
+        let good = data.dataset.good;
+        let DomSkill = document.createElement('div');
+        DomSkill.innerHTML = skill;
+        data.appendChild(DomSkill);
+        let dots = CreateDots(data, 5, good);
+
+    });
+
+});
+</script>
