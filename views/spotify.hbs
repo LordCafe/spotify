@@ -35,11 +35,14 @@
     </div>
 </div>
 <script type="text/javascript">
+
+var player;    
 let controls = {
 
     click: function(e) {
         e.classList.toggle('fa-play-circle');
         e.classList.toggle('fa-pause-circle');
+        player.togglePlay()
     }
 }
 
@@ -53,6 +56,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
     let RenderPreview = (track) => {
         let { album, uri } = track;
         let Preview = document.querySelector("#currentSong");
+        console.log(uri != Preview.dataset.trackId);
         if (uri != Preview.dataset.trackId ) {
             Preview.dataset.trackId = track.uri;
             Preview.querySelector('img').src = album.images[0].url;
@@ -68,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
     window.onSpotifyWebPlaybackSDKReady = () => {
         let urlParams = new URLSearchParams(location.search);
         const token = urlParams.get('access_token');
-        const player = new Spotify.Player({
+        player = new Spotify.Player({
             name: 'SnapSoptify',
             getOAuthToken: cb => { cb(token); }
         });
@@ -140,6 +144,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
                 let html = albumHtml({ id: album.id, src: album.images[0].url, name: track.name, artist: track.artists[0].name }, track);
                 target.insertAdjacentHTML('beforeend', html);
                 target.lastElementChild.addEventListener('click', function(event) {
+                    console.log(track.name)
                     SpotifySnap.PlaySong(track.uri);
                     RenderPreview(track);
 

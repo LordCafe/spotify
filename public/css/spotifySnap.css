@@ -23,7 +23,10 @@ body{
 	color: #777;
 }
 
-#result{}
+#result{
+	position: absolute;
+	z-index: 100000;
+}
 .spotify-result{
 	width: 100%;
 	background-color: rgba(1,1,1,.8);

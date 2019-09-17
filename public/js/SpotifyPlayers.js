@@ -76,7 +76,7 @@ class SpotifyPlayers {
 
 
     PlaySong(idtrack){
-        console.log(this);
+        
         return  fetch(`https://api.spotify.com/v1/me/player/play?device_id=${this.device}`, {
             method: 'PUT',
             body: JSON.stringify({ uris: [idtrack] }),
@@ -85,7 +85,7 @@ class SpotifyPlayers {
                 'Authorization': `Bearer ${this.token}`
             },
         }).then((data)=>{
-            console.log( data , 'here');
+            
         });
 
     }
