@@ -1,11 +1,12 @@
 <div class="spotify-container">
     <div class="row">
-        <div class="col-3 fix-spotify">
-            <div id='profile-spotify' class="card ">
-                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPgvBgACHgEXvIm+6QAAAABJRU5ErkJggg==" class="card-img-top rounded-circle width35 " alt="...">
+        <div id="currentSong" class="col-3 fix-spotify">
+            <div class="card">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPgvBgACHgEXvIm+6QAAAABJRU5ErkJggg==" class="card-img-top" alt="...">
                 <div class="card-body">
-                    <h5 class="card-title">Card title</h5>
-                    <a href="">Profile</a>
+                    <p class="card-title"></p>
+                    <p class="card-text"></p>
+                    <i data-status='play' class="fa fa-play-circle" onclick="controls.click(this)"></i>
                 </div>
             </div>
         </div>
@@ -20,18 +21,16 @@
         </div>
     </div>
     <div class="row">
-        <div id="currentSong" class="col-3 fix-spotify">
-            <div class="card">
-                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPgvBgACHgEXvIm+6QAAAABJRU5ErkJggg==" class="card-img-top" alt="...">
+        <div class="col-3 fix-spotify">
+            <div id='profile-spotify' class="card ">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPgvBgACHgEXvIm+6QAAAABJRU5ErkJggg==" class="card-img-top rounded-circle width35 " alt="...">
                 <div class="card-body">
-                    <p class="card-title"></p>
-                    <p class="card-text"></p>
-                    <i data-status='play' class="fa fa-play-circle" onclick="controls.click(this)"></i>
+                    <h5 class="card-title">Card title</h5>
+                    <a href="">Profile</a>
                 </div>
             </div>
         </div>
         <div class="col-9 fix-spotify black">
-            
         </div>
     </div>
 </div>
