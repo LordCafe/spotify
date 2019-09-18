@@ -3,6 +3,36 @@ body{
 }
 
 
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+    outline: none;
+}
+
+*:focus {
+    outline: none;
+}
+input[type='text']{
+	height: 60px;
+    width: 100%;
+    min-width: 100%;
+    padding: 0;
+    border-radius: 0;
+    line-height: 70px;
+    background-color: transparent;
+    color: white;
+    font-size: 30px;
+    border: none;
+    outline: none;
+    border-bottom: 3px solid #333333;
+    font-family: Roboto Slab, sans-serif;
+ 
+}
+
+ input[type='text']:focus { background-color: #555;  color:#fff; border:none;      outline-offset: -2px;}
+ input[type='text']:active { background-color: #555; border:none;  outline: none !important;}
+
 .fa{
 	color:#dddd;
 }
@@ -14,6 +44,12 @@ body{
 	background-color: rgba(0,0,0,.8);
 	color: white;
 }
+
+#profile-spotify a{ 
+	color:#ffff;
+	font-weight: bolder;
+}
+
 
 .spotify-title{
 	color: #DDDD;
@@ -28,7 +64,7 @@ body{
 	z-index: 100000;
 }
 .spotify-result{
-	width: 100%;
+	width: 90%;
 	background-color: rgba(1,1,1,.8);
 	margin: 0px;
 
@@ -38,9 +74,21 @@ body{
 .spotify-result:hover{
 	background-color: rgba(1,1,1,1);
 }
+
 .width50{
 	width: 50%;
 }
+
+
+#profile-spotify  img{
+	margin:10%;
+}
+
+.width35{
+	width: 35%;
+}
+
+
 
 
 #currentSong .card {

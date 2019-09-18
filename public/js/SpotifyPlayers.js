@@ -99,16 +99,24 @@ class SpotifyPlayers {
 
 
 let albumHtml = ({ id, src, name, artist }, all ) => {
+    console.log(all);
     let matchAlbum = `    
         <div id="${id}" class="row spotify-result" >           
-            <div class="col-6" >
+           
+            <div class='col-1'>            
+                 <i class="fa fa-play"></i>      
+            </div>               
+            <div class='col-8'>
                 <div>
-                    <h5 class="spotify-title">${name}</h5>
-                    <p class="spotify-text">${artist}</p>                            
-                </div>
-            </div>
-            <div class='col-1'><i class="fa fa-music"></i></div>
-            <div class='col-1'><i class="fa fa-play"></i></div>              
+                    <span class="spotify-title">${name}</span>
+                <div>
+                
+                <span class="spotify-artist">${ artist }</span> *
+                <span class="spotify-album">${ all.album.name }</span> 
+            </div>                               
+                    
+                   
+                          
         </div>
      `;
 

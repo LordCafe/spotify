@@ -2,20 +2,20 @@
     <div class="row">
         <div class="col-4">
             <div id='profile-spotify' class="card ">
-                <img src="" class="card-img-top rounded-circle width50 " alt="...">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPgvBgACHgEXvIm+6QAAAABJRU5ErkJggg==" class="card-img-top rounded-circle width35 " alt="...">
                 <div class="card-body">
                     <h5 class="card-title">Card title</h5>
+                    <a  href="">Profile</a>
                 </div>
             </div>
         </div>
         <div class="col-8 ">
             <div>
-                <form id="SpotifySnapform">
-                    <div class="form-group">
+                <form id="SpotifySnapform" autocomplete="off">
+                   
                         <input type="text" class="form-control" id="SearchSpotify" placeholder="Escribir...">
                         <button type="submit" class="btn btn-primary mb-2" style="display: none">Buscar</button>
-                    </div>
-                </form>
+                                   </form>
                 <div id="result" class="result row " style="position:absolute; "></div>
             </div>
         </div>
@@ -55,8 +55,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
     let RenderPreview = (track) => {
         let { album, uri } = track;
-        let Preview = document.querySelector("#currentSong");
-        console.log(uri != Preview.dataset.trackId);
+        let Preview = document.querySelector("#currentSong");        
         if (uri != Preview.dataset.trackId ) {
             Preview.dataset.trackId = track.uri;
             Preview.querySelector('img').src = album.images[0].url;
@@ -93,8 +92,6 @@ document.addEventListener('DOMContentLoaded', function(event) {
         player.addListener('ready', ({ device_id }) => {
             console.log('Ready with Device ID', device_id);
             SpotifySnap.SetDevide(device_id);
-
-
         });
 
         // Not Ready
@@ -111,10 +108,12 @@ document.addEventListener('DOMContentLoaded', function(event) {
     };
 
     SpotifySnap.GetInfo().then((user) => {
+        console.log(user);
         let { images: [avatar], display_name } = user;
         let profile = document.querySelector('#profile-spotify');
         profile.querySelector('img').src = avatar.url;
         profile.querySelector(".card-title").innerText = display_name;
+        profile.querySelector('a').href = user.external_urls.spotify;
 
     });
 
@@ -143,8 +142,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
                 let { album } = track;
                 let html = albumHtml({ id: album.id, src: album.images[0].url, name: track.name, artist: track.artists[0].name }, track);
                 target.insertAdjacentHTML('beforeend', html);
-                target.lastElementChild.addEventListener('click', function(event) {
-                    console.log(track.name)
+                target.lastElementChild.addEventListener('click', function(event) {        
                     SpotifySnap.PlaySong(track.uri);
                     RenderPreview(track);
 
