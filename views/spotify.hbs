@@ -1,7 +1,16 @@
 <div class="spotify-container">
     <div class="row">
-        <div id="currentSong" class="col-3 fix-spotify">
-            <div class="card">
+        <div class="col-3 fix-spotify">
+            <div id='profile-spotify' class="card ">
+                <div class="card-body">
+                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPgvBgACHgEXvIm+6QAAAABJRU5ErkJggg==" class="card-img-top rounded-circle width20 " alt="...">
+                    <div id="data-user">
+                        <div><a class="card-title">Card title</a></div>
+                        <a href="">Profile</a>
+                    </div>
+                </div>
+            </div>
+            <div id="currentSong" class="card">
                 <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPgvBgACHgEXvIm+6QAAAABJRU5ErkJggg==" class="card-img-top" alt="...">
                 <div class="card-body">
                     <p class="card-title"></p>
@@ -17,24 +26,15 @@
                     <button type="submit" class="btn btn-primary mb-2" style="display: none">Buscar</button>
                 </form>
                 <div id="result" class="result row "></div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-3 fix-spotify">
-            <div id='profile-spotify' class="card ">
-                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPgvBgACHgEXvIm+6QAAAABJRU5ErkJggg==" class="card-img-top rounded-circle width35 " alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Card title</h5>
-                    <a href="">Profile</a>
+                <div id="Previus" class="result row ">
                 </div>
             </div>
-        </div>
-        <div class="col-9 fix-spotify black">
         </div>
     </div>
 </div>
 <script type="text/javascript">
+let SearchResult = document.querySelector('#result');
+let PreviusItems = document.querySelector('#Previus');
 var player;
 let controls = {
 
@@ -53,17 +53,39 @@ document.addEventListener('DOMContentLoaded', function(event) {
     });
 
     let RenderPreview = (track) => {
-        let { album, uri } = track;
-        let Preview = document.querySelector("#currentSong");
-        if (uri != Preview.dataset.trackId) {
-            Preview.dataset.trackId = track.uri;
-            Preview.querySelector('img').src = album.images[0].url;
-            Preview.querySelector('.card-title').innerText = track.name;
-            Preview.querySelector('.card-text').innerText = track.artists[0].name;
-            Preview.querySelector('i').click();
+
+        new Promise((resolve, fail) => {
+            let { album, uri } = track;
+            let Preview = document.querySelector("#currentSong");
+            if (uri != Preview.dataset.trackId) {
+                Preview.dataset.trackId = track.uri;
+                Preview.querySelector('img').src = album.images[0].url;
+                Preview.querySelector('.card-title').innerText = track.name;
+                Preview.querySelector('.card-text').innerText = track.artists[0].name;
+                resolve(track);
+                let target = document.querySelector('#result').innerHTML = '';
+            }
+
+        });
+
+    }
+
+    let PlayAndRender = (track, newBorn) => {
+        SpotifySnap.PlaySong(track.uri);
+        RenderPreview(track);
+        let previouslyAdd = PreviusItems.querySelector('#' + newBorn.id) || false;
+        if (!previouslyAdd) {
+            PreviusItems.appendChild(newBorn);
         }
 
+    }
 
+    let CreateListPlayer = (track) => {
+        let { album } = track;
+        let html = albumHtml({ id: album.id, src: album.images[0].url, name: track.name, artist: track.artists[0].name }, track);
+        SearchResult.insertAdjacentHTML('beforeend', html);
+        let newBorn = SearchResult.lastElementChild;
+        newBorn.addEventListener('click', () => { PlayAndRender(track, newBorn) }, false);
     }
 
 
@@ -84,7 +106,10 @@ document.addEventListener('DOMContentLoaded', function(event) {
         // Playback status updates
         player.addListener('player_state_changed', state => {
             let { track_window } = state;
-            RenderPreview(track_window.current_track);
+            RenderPreview(track_window.current_track)
+            .then(( track )=>{
+
+            });
         });
 
         // Ready
@@ -107,7 +132,6 @@ document.addEventListener('DOMContentLoaded', function(event) {
     };
 
     SpotifySnap.GetInfo().then((user) => {
-        console.log(user);
         let { images: [avatar], display_name } = user;
         let profile = document.querySelector('#profile-spotify');
         profile.querySelector('img').src = avatar.url;
@@ -116,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
     });
 
-    let target = document.querySelector('#result');
+
     let lastTrack = SpotifySnap.GetLastPlayed().then((tracks) => {
         let { track } = tracks.items[0];
 
@@ -124,12 +148,13 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
 
 
+
+
     document.querySelector('#SpotifySnapform').addEventListener('submit', function(event) {
         event.preventDefault();
         let element = event.target;
         let search = element.SearchSpotify;
-        target.innerHTML = '';
-
+        SearchResult.innerHTML = '';
         SpotifySnap.Search({
             q: search.value,
             type: 'track',
@@ -137,16 +162,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
             offset: 5,
         }).then((result) => {
             let { tracks } = result;
-            tracks.items.map(function(track, index) {
-                let { album } = track;
-                let html = albumHtml({ id: album.id, src: album.images[0].url, name: track.name, artist: track.artists[0].name }, track);
-                target.insertAdjacentHTML('beforeend', html);
-                target.lastElementChild.addEventListener('click', function(event) {
-                    SpotifySnap.PlaySong(track.uri);
-                    RenderPreview(track);
-
-                }, false);
-            })
+            tracks.items.map(CreateListPlayer)
         })
 
 
