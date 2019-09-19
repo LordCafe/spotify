@@ -45,6 +45,12 @@ let controls = {
     }
 }
 
+var LoadSong = new CustomEvent('LoadSong');
+let Preview = document.querySelector("#currentSong");
+Preview.addEventListener('LoadSong', function (elem) {
+   console.log(Preview.Song);
+}, false);
+
 document.addEventListener('DOMContentLoaded', function(event) {
     let urlParams = new URLSearchParams(location.search);
     const token = urlParams.get('access_token');
@@ -53,17 +59,18 @@ document.addEventListener('DOMContentLoaded', function(event) {
     });
 
     let RenderPreview = (track) => {
-
         return new Promise((resolve, fail) => {
             let { album, uri } = track;
-            let Preview = document.querySelector("#currentSong");
+            
             if (uri != Preview.dataset.trackId) {
                 Preview.dataset.trackId = track.uri;
                 Preview.querySelector('img').src = album.images[0].url;
                 Preview.querySelector('.card-title').innerText = track.name;
                 Preview.querySelector('.card-text').innerText = track.artists[0].name;
-                resolve(track);
+                Preview.Song= track;                
+                Preview.dispatchEvent(LoadSong);
                 let target = document.querySelector('#result').innerHTML = '';
+                resolve(track);
             }
 
         });
@@ -71,8 +78,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
     }
 
     let PlayAndRender = (track, newBorn, play = true) => {
-        let played = (play) ? SpotifySnap.PlaySong(track.uri) : false;
-        console.log(played);
+        let played = (play) ? SpotifySnap.PlaySong(track.uri) : false;        
         RenderPreview(track);
         let previouslyAdd = PreviusItems.querySelector('#' + newBorn.id) || false;
         if (!previouslyAdd) {
@@ -107,7 +113,10 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
         // Error handling
         player.addListener('initialization_error', ({ message }) => { console.error(message); });
-        player.addListener('authentication_error', ({ message }) => { console.error(message); });
+        player.addListener('authentication_error', ({ message }) => { 
+            window.location.href='loginSpo';
+
+        });
         player.addListener('account_error', ({ message }) => { console.error(message); });
         player.addListener('playback_error', ({ message }) => { console.error(message); });
 
@@ -150,8 +159,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
     });
 
 
-    let lastTrack = SpotifySnap.GetLastPlayed().then((tracks) => {
-        console.log(tracks);
+    let lastTrack = SpotifySnap.GetLastPlayed().then((tracks) => {    
         tracks.items.map((data)=>{
             let CreateItem = CreateListPlayer.bind({  target :PreviusItems });
             let name = data.track.name;
@@ -176,8 +184,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
             limit: 10,
             offset: 5,
         }).then((result) => {
-            let { tracks } = result;
-            console.log(tracks, 'result');
+            let { tracks } = result;    
             tracks.items.map(CreateListPlayer, { target: SearchResult })
         })
 
