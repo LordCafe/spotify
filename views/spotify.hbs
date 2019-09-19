@@ -17,7 +17,11 @@
                     <p class="card-text"></p>
                     <i data-status='play' class="fa fa-play-circle" onclick="controls.click(this)"></i>
                     <div class="progress">
-                        <div class="progress-bar" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div id='progressTimer' class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <div id="time" data-init='0'>
+                        <span id="pmins">00</span>:<span id="pseconds">00</span> /
+                        <span id="mins">00</span>:<span id="seconds">00</span>
                     </div>
                 </div>
             </div>
@@ -38,7 +42,7 @@
 <script type="text/javascript">
 let SearchResult = document.querySelector('#result');
 let PreviusItems = document.querySelector('#Previus');
-var player;
+var player; let Crono;
 let controls = {
 
     click: function(e) {
@@ -46,26 +50,81 @@ let controls = {
         e.classList.toggle('fa-pause-circle');
         player.togglePlay();
     }
+
+
+
 }
 
+let timer = function(ms, partial) {
+    console.log(ms , partial );
+
+
+    let timerDom = document.querySelector('#time');
+    let status = parseInt(timerDom.dataset.init)
+    if (!status) {
+        min = Math.floor((ms / 1000 / 60) << 0);
+        sec = Math.floor((ms / 1000) % 60);
+        document.querySelector('#mins').innerText = min;
+        document.querySelector('#seconds').innerText = sec;
+        let minus = 0;
+        timerDom.dataset.init = 1;
+        Crono = setInterval(function() {
+            let nms = ms - minus;
+            nmin = Math.floor((nms / 1000 / 60) << 0);
+            nsec = Math.floor((nms / 1000) % 60);
+
+            let porc = ms - nms;
+            let total = (100 * porc) / ms;
+            document.querySelector('#progressTimer').style.width = total + '%';
+            document.querySelector('#pmins').innerText = nmin;
+            document.querySelector('#pseconds').innerText = nsec;
+            if (nms <= 0) {
+                timerDom.dataset.init = 0;
+                clearInterval(Crono);
+
+            } else {
+                minus = minus + 500;
+            }
+
+
+        }, 500);
+
+
+
+    }
+
+
+}
 
 let Preview = document.querySelector("#currentSong");
 Preview.addEventListener('LoadSong', function(event) {
-    console.log(event.detail);
+    let {  detail } = event;
+    clearInterval(Crono);
+    let timerDom = document.querySelector('#time');
+    timerDom.dataset.init = 0;
+    timer(detail.duration_ms, 0);
+    
 }, false);
 
 
 Preview.addEventListener('Play', function(event) {
+    let { detail } = event;
     let button = Preview.querySelector('i[data-status="play"]');
     button.classList.remove('fa-play-circle');
     button.classList.add('fa-pause-circle');
+    timer(detail.duration, detail.position);
 }, false);
 
 Preview.addEventListener('Paused', function(event) {
     let button = Preview.querySelector('i[data-status="play"]');
     button.classList.remove('fa-pause-circle');
     button.classList.add('fa-play-circle');
+    let timer = document.querySelector('#time');
+    timer.dataset.init = 0;
+    clearInterval(Crono);
 }, false);
+
+
 
 
 document.addEventListener('DOMContentLoaded', function(event) {
@@ -146,14 +205,13 @@ document.addEventListener('DOMContentLoaded', function(event) {
             let EventTracks;
             if (state.paused) {
                 EventTracks = new CustomEvent('Paused', {
-                    detail: track_window.current_track
+                    detail: state
                 });
             } else {
                 EventTracks = new CustomEvent('Play', {
-                    detail: track_window.current_track
+                    detail: state
                 });
             }
-
             Preview.dispatchEvent(EventTracks);
             RenderPreview(track_window.current_track)
                 .then((track) => {
