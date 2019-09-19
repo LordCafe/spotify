@@ -151,7 +151,13 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
 
     let lastTrack = SpotifySnap.GetLastPlayed().then((tracks) => {
-        let { track } = tracks.items[0];
+        console.log(tracks);
+        tracks.items.map((data)=>{
+            let CreateItem = CreateListPlayer.bind({  target :PreviusItems });
+            let name = data.track.name;
+            console.log(name);
+            CreateItem(data.track);
+        })
 
     });
 
@@ -171,6 +177,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
             offset: 5,
         }).then((result) => {
             let { tracks } = result;
+            console.log(tracks, 'result');
             tracks.items.map(CreateListPlayer, { target: SearchResult })
         })
 
