@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
     let RenderPreview = (track) => {
 
-        new Promise((resolve, fail) => {
+        return new Promise((resolve, fail) => {
             let { album, uri } = track;
             let Preview = document.querySelector("#currentSong");
             if (uri != Preview.dataset.trackId) {
@@ -70,8 +70,9 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
     }
 
-    let PlayAndRender = (track, newBorn) => {
-        SpotifySnap.PlaySong(track.uri);
+    let PlayAndRender = (track, newBorn, play = true) => {
+        let played = (play) ? SpotifySnap.PlaySong(track.uri) : false;
+        console.log(played);
         RenderPreview(track);
         let previouslyAdd = PreviusItems.querySelector('#' + newBorn.id) || false;
         if (!previouslyAdd) {
@@ -80,12 +81,19 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
     }
 
-    let CreateListPlayer = (track) => {
+    let CreateListPlayer = function(track) {
+        let { target } = this;
         let { album } = track;
-        let html = albumHtml({ id: album.id, src: album.images[0].url, name: track.name, artist: track.artists[0].name }, track);
-        SearchResult.insertAdjacentHTML('beforeend', html);
-        let newBorn = SearchResult.lastElementChild;
-        newBorn.addEventListener('click', () => { PlayAndRender(track, newBorn) }, false);
+        let html = albumHtml({ id: track.id, src: album.images[0].url, name: track.name, artist: track.artists[0].name }, track);
+        let ghost = document.createElement('div');
+        ghost.insertAdjacentHTML('beforeend', html);
+        let InList = target.querySelector('#'+ghost.lastElementChild.id) || false ;
+        if (!InList) {
+            target.appendChild(ghost.lastElementChild);
+            let newBorn = target.lastElementChild;
+            newBorn.addEventListener('click', () => { PlayAndRender(track, newBorn) }, false);
+        }
+
     }
 
 
@@ -107,9 +115,10 @@ document.addEventListener('DOMContentLoaded', function(event) {
         player.addListener('player_state_changed', state => {
             let { track_window } = state;
             RenderPreview(track_window.current_track)
-            .then(( track )=>{
-
-            });
+                .then((track) => {
+                    let CreateItem = CreateListPlayer.bind({ target: PreviusItems });
+                    CreateItem(track);
+                });
         });
 
         // Ready
@@ -162,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
             offset: 5,
         }).then((result) => {
             let { tracks } = result;
-            tracks.items.map(CreateListPlayer)
+            tracks.items.map(CreateListPlayer, { target: SearchResult })
         })
 
 
