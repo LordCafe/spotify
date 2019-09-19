@@ -41,15 +41,31 @@ let controls = {
     click: function(e) {
         e.classList.toggle('fa-play-circle');
         e.classList.toggle('fa-pause-circle');
-        player.togglePlay()
+        player.togglePlay();
     }
 }
 
-var LoadSong = new CustomEvent('LoadSong');
+
 let Preview = document.querySelector("#currentSong");
-Preview.addEventListener('LoadSong', function (elem) {
-   console.log(Preview.Song);
+Preview.addEventListener('LoadSong', function(event) {
+    console.log(event.detail);
 }, false);
+
+
+Preview.addEventListener('Play', function(event) {
+    let button = Preview.querySelector('i[data-status="play"]');
+    button.classList.remove('fa-play-circle');
+    button.classList.add('fa-pause-circle');
+    
+
+}, false);
+
+Preview.addEventListener('Paused', function(event) {
+    let button = Preview.querySelector('i[data-status="play"]');
+    button.classList.remove('fa-pause-circle');
+    button.classList.add('fa-play-circle');
+}, false);
+
 
 document.addEventListener('DOMContentLoaded', function(event) {
     let urlParams = new URLSearchParams(location.search);
@@ -61,13 +77,16 @@ document.addEventListener('DOMContentLoaded', function(event) {
     let RenderPreview = (track) => {
         return new Promise((resolve, fail) => {
             let { album, uri } = track;
-            
+
             if (uri != Preview.dataset.trackId) {
                 Preview.dataset.trackId = track.uri;
                 Preview.querySelector('img').src = album.images[0].url;
                 Preview.querySelector('.card-title').innerText = track.name;
                 Preview.querySelector('.card-text').innerText = track.artists[0].name;
-                Preview.Song= track;                
+                Preview.Song = track;
+                let LoadSong = new CustomEvent('LoadSong', {
+                    detail: track
+                });
                 Preview.dispatchEvent(LoadSong);
                 let target = document.querySelector('#result').innerHTML = '';
                 resolve(track);
@@ -78,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
     }
 
     let PlayAndRender = (track, newBorn, play = true) => {
-        let played = (play) ? SpotifySnap.PlaySong(track.uri) : false;        
+        let played = (play) ? SpotifySnap.PlaySong(track.uri) : false;
         RenderPreview(track);
         let previouslyAdd = PreviusItems.querySelector('#' + newBorn.id) || false;
         if (!previouslyAdd) {
@@ -93,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
         let html = albumHtml({ id: track.id, src: album.images[0].url, name: track.name, artist: track.artists[0].name }, track);
         let ghost = document.createElement('div');
         ghost.insertAdjacentHTML('beforeend', html);
-        let InList = target.querySelector('#'+ghost.lastElementChild.id) || false ;
+        let InList = target.querySelector('#' + ghost.lastElementChild.id) || false;
         if (!InList) {
             target.appendChild(ghost.lastElementChild);
             let newBorn = target.lastElementChild;
@@ -113,8 +132,8 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
         // Error handling
         player.addListener('initialization_error', ({ message }) => { console.error(message); });
-        player.addListener('authentication_error', ({ message }) => { 
-            window.location.href='loginSpo';
+        player.addListener('authentication_error', ({ message }) => {
+            window.location.href = 'loginSpo';
 
         });
         player.addListener('account_error', ({ message }) => { console.error(message); });
@@ -123,6 +142,18 @@ document.addEventListener('DOMContentLoaded', function(event) {
         // Playback status updates
         player.addListener('player_state_changed', state => {
             let { track_window } = state;
+            let EventTracks;
+            if (state.paused) {
+                EventTracks = new CustomEvent('Paused', {
+                    detail: track_window.current_track
+                });
+            } else {
+                EventTracks = new CustomEvent('Play', {
+                    detail: track_window.current_track
+                });
+            }
+
+            Preview.dispatchEvent(EventTracks);
             RenderPreview(track_window.current_track)
                 .then((track) => {
                     let CreateItem = CreateListPlayer.bind({ target: PreviusItems });
@@ -159,11 +190,10 @@ document.addEventListener('DOMContentLoaded', function(event) {
     });
 
 
-    let lastTrack = SpotifySnap.GetLastPlayed().then((tracks) => {    
-        tracks.items.map((data)=>{
-            let CreateItem = CreateListPlayer.bind({  target :PreviusItems });
+    let lastTrack = SpotifySnap.GetLastPlayed().then((tracks) => {
+        tracks.items.map((data) => {
+            let CreateItem = CreateListPlayer.bind({ target: PreviusItems });
             let name = data.track.name;
-            console.log(name);
             CreateItem(data.track);
         })
 
@@ -184,7 +214,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
             limit: 10,
             offset: 5,
         }).then((result) => {
-            let { tracks } = result;    
+            let { tracks } = result;
             tracks.items.map(CreateListPlayer, { target: SearchResult })
         })
 
