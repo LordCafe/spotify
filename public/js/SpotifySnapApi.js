@@ -10,7 +10,7 @@ const Refresh = (event) => {
     });
 }
 
-class SpotifyPlayers {
+class SpotifySnapApi {
     constructor({ token }) {
         this.token = token;
         this.device = null;
@@ -18,7 +18,8 @@ class SpotifyPlayers {
 
     SetDevide(id){
         this.device = id; 
-        console.log("device ready");
+        console.log('Ready with Device ID',id);
+        
     }
     Search(params) {
         let Data = {
@@ -75,8 +76,7 @@ class SpotifyPlayers {
     }
 
 
-    PlaySong(idtrack){
-        
+    PlaySong(idtrack){        
         return  fetch(`https://api.spotify.com/v1/me/player/play?device_id=${this.device}`, {
             method: 'PUT',
             body: JSON.stringify({ uris: [idtrack] }),
@@ -85,7 +85,7 @@ class SpotifyPlayers {
                 'Authorization': `Bearer ${this.token}`
             },
         }).then((data)=>{
-            
+            return data;
         });
 
     }

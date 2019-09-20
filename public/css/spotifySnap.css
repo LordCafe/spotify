@@ -41,7 +41,15 @@ input[type='text'] {
     border-bottom: 3px solid #333333;
     font-family: Roboto Slab, sans-serif;
 
+}
 
+.progress{
+	height: 5px;
+	
+}
+
+.progress-bar{
+	background-color: #48ba55;
 }
 
 input[type='text']:focus {
